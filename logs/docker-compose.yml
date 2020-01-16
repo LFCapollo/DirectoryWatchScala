@@ -1,0 +1,36 @@
+version: "3"
+
+services: 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.1
+    environment: 
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks: 
+      - logging-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.4.1
+    depends_on:
+      - elasticsearch 
+    ports: 
+      - 5601:5601
+    networks: 
+      - logging-network
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.4.1
+    user: root
+    volumes:
+      - '/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro'
+      #- main.log:/usr/share/filebeat/logs
+
+networks: 
+  logging-network:
+    driver: bridge
+volumes:
+  elasticsearch_data:
+    driver: local
